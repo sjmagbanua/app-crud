@@ -87,22 +87,23 @@
                 </td>
                 <td>
                     <!-- Button trigger modal -->
-                    <button type="button" class="btn btn-primary edit-btn" data-bs-toggle="modal" data-bs-target="#editModal">
-                    Edit
+                    <button type="button" class="btn btn-primary edit-btn" data-bs-toggle="modal" data-bs-target="#editModal" data-product-id="{{$product->id}}">
+                        Edit
                     </button>
+
 
                     <!-- Modal -->
                     <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
                     <div class="modal-dialog">
                         <div class="modal-content">
-                        <div class="modal-header">
+                        <div class="modal-header">  
                             <h5 class="modal-title" id="exampleModalLabel">edit product</h5>
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
-                        <form class="row g-3" method="get" id="editModal{{ $product->id }}">
+                        <form class="row g-3">
                         <div class="modal-body">
-                                @csrf
-                                @method('get')
+                                    @csrf
+                                    @method('put')
                                 <div class="col-auto ">
                                     <input type="text"  class="form-control"  name="name" placeholder="{{$product->name}}">
                                 </div>
@@ -122,7 +123,7 @@
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                            <button type="submit" class="btn btn-primary edit-btn">Edit Product</button>
+                            <button type="submit" class="btn btn-primary" id="editForm">Edit Product</button>
                         </div>
                         </form>
 
@@ -169,7 +170,9 @@
                 // Display success message
                 alert('Post created successfully.');
                 console.log(name);
-
+                console.log(qty);
+                console.log(price);
+                console.log(description);
                 },
                 error: function(xhr) {
                 console.error(xhr.responseText);
@@ -180,30 +183,63 @@
             });
         });
 
-
+       
         $(document).ready(function() {
-        $('.edit-btn').click(function() {
-            var productId = $(this).data('product-id');
+            // Event handler for edit button click
+            $('.edit-btn').click(function() {
+                var productId = $(this).data('product-id');
+                console.log(`id ${productId}`);
 
-            // AJAX Request to fetch product data
-            $.ajax({
-                url: '/product/' + productId + '/edit',
-                type: 'GET',
-                success: function(response) {
-                    // Populate the edit modal with product data
-                    $('#editModal' + productId + ' #name').val(response.name);
-                    $('#editModal' + productId + ' #qty').val(response.qty);
-                    $('#editModal' + productId + ' #price').val(response.price);
-                    $('#editModal' + productId + ' #description').val(response.description);
-                },
-                error: function(xhr) {
-                    console.error(xhr.responseText);
-                    // Optionally, display error message
-                    alert('Error occurred. Please try again.');
-                }
+                // AJAX Request to fetch product data
+                $.ajax({
+                    url: '/product/' + productId + '/edit',
+                    type: 'GET',
+                    success: function(response) {
+                        // Populate the edit modal with product data
+                        $('#editModal input[name="name"]').val(response.name);
+                        $('#editModal input[name="qty"]').val(response.qty);
+                        $('#editModal input[name="price"]').val(response.price);
+                        $('#editModal input[name="description"]').val(response.description);
+                        $('#editModal').modal('show'); // Show the edit modal
+                        console.log(`name: ${response.name}`);
+
+                    },
+                    error: function(xhr) {
+                        console.error(xhr.responseText);
+                        // Optionally, display error message
+                        alert('Error occurred. Please try again.');
+                    }
+                });
+            });
+
+            // Event handler for edit form submission
+            $('#editForm').click(function(event) {
+                event.preventDefault(); // Prevent default form submission
+                
+                var productId = $(this).data('product-id'); // Get the product ID
+                console.log(`ajax id: ${productId}`);
+                // Perform AJAX request to update product data
+                $.ajax({
+                    url: '/product/' + productId, // Endpoint for updating product
+                    type: 'PUT', // Use PUT method for update
+                    data: $(this).serialize(), // Serialize form data
+                    headers: {
+                        'X-CSRF-TOKEN': csrfToken // Include CSRF token in headers
+                    },
+                    success: function(response) {
+                        // Optionally, handle success response
+                        console.log(response);
+                        // Close modal
+                        $('#editModal').modal('hide');
+                    },
+                    error: function(xhr) {
+                        console.error(xhr.responseText);
+                        // Optionally, display error message
+                        alert('Error occurred. Please try again.');
+                    }
+                });
             });
         });
-    });
     </script>
 
 </body>

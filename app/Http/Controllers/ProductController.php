@@ -37,4 +37,19 @@ class ProductController extends Controller
         $product = Product::find($id); // Assuming you have a Product model
         return response()->json($product);
     }
+
+    public function update(Request $request, $id)
+    {
+        $data = $request->validate([
+            'name' => 'required',
+            'qty' => 'required',
+            'price' => 'required|numeric', // Corrected the validation rule
+            'description' => 'nullable',
+        ]);
+
+        $product = Product::findOrFail($id); // Find the product
+        $product->update($data); // Update the product with new data
+
+        return response()->json(['message' => 'Product updated successfully']);
+    }
 }
